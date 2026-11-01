@@ -30,20 +30,21 @@ OctoFit Tracker is a three-tier application for a school fitness program. The st
 
 Record your plan here before editing code.
 
-- Presentation tier decision:
-- Logic tier decision:
-- Data tier decision:
-- Activity tracking approach:
-- Team management approach:
-- Leaderboard approach:
-- Workout suggestions approach:
+- Presentation tier decision: Keep route-level views in React and use the shared API client for relative `/api` requests. Each capability view will expose loading, populated, empty, and accessible error states without embedding persistence or business rules in components.
+- Logic tier decision: Keep request validation, scoring, membership updates, aggregation, and recommendation selection in `octofitService.ts`; routes translate service results and errors into the documented JSON and HTTP contracts.
+- Data tier decision: Use Mongoose schemas with required identity and capability fields, ObjectId references between users, teams, and activities, and a default empty `members` array. Seed stable demo records with upserts and never clear unrelated records.
+- Activity tracking approach: Validate the submitted user and team IDs and confirm both records exist before creating an activity. Store the references, type, minutes, a deterministic points value based on minutes, and an occurrence timestamp; invalid input or missing references must return 4xx responses rather than cast-error 500s.
+- Team management approach: Require a name, preserve the submitted name and mascot, and keep member references as ObjectIds with an empty-array default. When associating a user with a team, keep the user's team reference and the team's members list consistent.
+- Leaderboard approach: Aggregate activity points by team, sort totals descending, and assign ranks starting at 1. Return the team name and total alongside each rank.
+- Workout suggestions approach: Find the user by email, use the user's fitness goal and recent activity to select and explain relevant seeded workouts, and return a deliberate 4xx response when no user matches.
 
 ## Test plan
 
-Record the commands you run and what each failure means.
+Run the focused contract tests first, then both builds. A failing data test points to a schema invariant or seed regression; a failing API test points to service behavior, validation, or response-shape errors; a failing frontend test points to rendering, request state, accessibility, or API-client wiring. A build failure indicates a TypeScript or bundling error.
 
-- Data-tier command: `npm run test:data --prefix octofit-tracker/backend`
-- API command: `npm run test:api --prefix octofit-tracker/backend`
-- Frontend command: `npm test --prefix octofit-tracker/frontend`
-- Backend build command: `npm run build --prefix octofit-tracker/backend`
-- Frontend build command: `npm run build --prefix octofit-tracker/frontend`
+- Data tier: `npm run test:data --prefix octofit-tracker/backend` - currently 4 schema assertions fail (required user, team, activity, and workout fields); the seed/idempotence test passes (1/5).
+- API: `npm run test:api --prefix octofit-tracker/backend` - currently all 4 tests fail: activity and team creation return the unimplemented 501, leaderboard is empty, and workout suggestions do not match the requested user.
+- Frontend: `npm test --prefix octofit-tracker/frontend` - currently 15/15 tests fail: API-backed content and user-specific suggestions are missing, as are loading, meaningful empty, and accessible error states for all four routes.
+- Backend build: `npm run build --prefix octofit-tracker/backend` - passed; rerun after implementation to catch TypeScript errors.
+- Frontend build: `npm run build --prefix octofit-tracker/frontend` - passed; rerun after implementation to catch TypeScript or Vite errors.
+- Codespace seed idempotence: run `npm run seed --prefix octofit-tracker/backend` twice against the configured MongoDB instance; not run against the live Codespace database in this check. The data-contract test separately verifies repeated seeding against an isolated in-memory MongoDB and preservation of unrelated records.
