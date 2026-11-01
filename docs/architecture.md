@@ -42,9 +42,9 @@ Record your plan here before editing code.
 
 Run the focused contract tests first, then both builds. A failing data test points to a schema invariant or seed regression; a failing API test points to service behavior, validation, or response-shape errors; a failing frontend test points to rendering, request state, accessibility, or API-client wiring. A build failure indicates a TypeScript or bundling error.
 
-- Data tier: `npm run test:data --prefix octofit-tracker/backend` - currently 4 schema assertions fail (required user, team, activity, and workout fields); the seed/idempotence test passes (1/5).
-- API: `npm run test:api --prefix octofit-tracker/backend` - currently all 4 tests fail: activity and team creation return the unimplemented 501, leaderboard is empty, and workout suggestions do not match the requested user.
-- Frontend: `npm test --prefix octofit-tracker/frontend` - currently 15/15 tests fail: API-backed content and user-specific suggestions are missing, as are loading, meaningful empty, and accessible error states for all four routes.
+- Data tier: `npm run test:data --prefix octofit-tracker/backend` - passed (5/5), including schema validation, seed repeatability, and preservation of unrelated records.
+- API: `npm run test:api --prefix octofit-tracker/backend` - passed (4/4), covering activity validation and creation, teams and members, leaderboard ranking, and personalized workout suggestions.
+- Frontend: `npm test --prefix octofit-tracker/frontend` - passed (15/15), covering API-backed content and loading, empty, and accessible error states on all four routes.
 - Backend build: `npm run build --prefix octofit-tracker/backend` - passed; rerun after implementation to catch TypeScript errors.
 - Frontend build: `npm run build --prefix octofit-tracker/frontend` - passed; rerun after implementation to catch TypeScript or Vite errors.
-- Codespace seed idempotence: run `npm run seed --prefix octofit-tracker/backend` twice against the configured MongoDB instance; not run against the live Codespace database in this check. The data-contract test separately verifies repeated seeding against an isolated in-memory MongoDB and preservation of unrelated records.
+- Codespace seed idempotence: run `npm run seed --prefix octofit-tracker/backend` twice against the configured MongoDB instance; two consecutive live runs were not verified in this check. The data-contract test verifies repeated seeding against an isolated in-memory MongoDB and preservation of unrelated records.

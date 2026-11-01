@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { getJson } from '../api/client.js';
-import { CapabilityCard } from './CapabilityCard.js';
 
 type ActivityRecord = {
   _id?: string;
